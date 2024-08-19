@@ -437,8 +437,3 @@ onInput("d", () => {
   if (checkWin() || checkLoss()) return;
 });
 
-onInput("j", () => undoMove());
-
-addRandomTile();
-addRandomTile();
-drawGrid();
