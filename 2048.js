@@ -281,7 +281,6 @@ function slideRight() {
     let zeros = Array(missing).fill(0);
     grid[i] = zeros.concat(row);
   }
-}
 
 function combineRight() {
   for (let i = 0; i < gridSize; i++) {
@@ -384,7 +383,7 @@ function moveDown() {
   combineDown();
   slideDown();
   addRandomTile();
-  drawGrid();
+  drawGrid(); 
 }
 
 function checkWin() {
@@ -437,3 +436,8 @@ onInput("d", () => {
   if (checkWin() || checkLoss()) return;
 });
 
+onInput("u", () => undoMove());
+
+addRandomTile();
+addRandomTile();
+drawGrid();
