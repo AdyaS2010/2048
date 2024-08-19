@@ -13,22 +13,22 @@ let highScore = 0;
 
 setLegend(
    [ 'border', bitmap`
-LLLLLLLLLLLLLLLL
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-L..............L
-LLLLLLLLLLLLLLLL`],
+1111111111111111
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1..............1
+1111111111111111`],
   [ 'tile2', bitmap`
 2222222222222222
 2222222222222222
@@ -218,21 +218,6 @@ HHHHHHHHHHHHHHHH`],
 5555555555555555`]
 );
 
-let level = 0;
-const levels = [
-  map`
-----
-----
-----
-----`,
-];
-
-let gridSize = 4;
-let grid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
-let score = 0;
-let highScore = 0;
-let previousGrid = [];
-
 function addRandomTile() {
   let emptyTiles = [];
   for (let i = 0; i < gridSize; i++) {
@@ -282,6 +267,10 @@ function slideLeft() {
   }
 }
 
+function playSound(sound) {
+  // Add your sound playing logic here
+}
+
 function combineLeft() {
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize - 1; j++) {
@@ -292,13 +281,28 @@ function combineLeft() {
         if (score > highScore) {
           highScore = score;
         }
+        playSound('merge'); // Play merge sound
       }
     }
   }
 }
 
+function animateTileMove(fromX, fromY, toX, toY) {
+  let tile = getTile(fromX, fromY);
+  if (tile) {
+    tile.animate({ x: toX, y: toY }, 200); // 200ms animation duration
+  }
+}
+
 function moveLeft() {
   savePreviousGrid();
+  for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize - 1; j++) {
+      if (grid[i][j] === 0 && grid[i][j + 1] !== 0) {
+        animateTileMove(j + 1, i, j, i);
+      }
+    }
+  }
   slideLeft();
   combineLeft();
   slideLeft();
