@@ -7,6 +7,9 @@
 
 const gridSize = 4;
 let grid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+let previousGrid = [];
+let score = 0;
+let highScore = 0;
 
 function addRandomTile() {
   let emptyTiles = [];
@@ -33,6 +36,19 @@ function drawGrid() {
       }
     }
   }
+  addText(`Score: ${score}`, { x: 1, y: 8, color: color`3` });
+  addText(`High Score: ${highScore}`, { x: 1, y: 9, color: color`3` });
+}
+
+function savePreviousGrid() {
+  previousGrid = grid.map(row => row.slice());
+}
+
+function undoMove() {
+  if (previousGrid.length > 0) {
+    grid = previousGrid.map(row => row.slice());
+    drawGrid();
+  }
 }
 
 function slideLeft() {
@@ -50,12 +66,17 @@ function combineLeft() {
       if (grid[i][j] === grid[i][j + 1] && grid[i][j] !== 0) {
         grid[i][j] *= 2;
         grid[i][j + 1] = 0;
+        score += grid[i][j];
+        if (score > highScore) {
+          highScore = score;
+        }
       }
     }
   }
 }
 
 function moveLeft() {
+  savePreviousGrid();
   slideLeft();
   combineLeft();
   slideLeft();
@@ -78,12 +99,17 @@ function combineRight() {
       if (grid[i][j] === grid[i][j - 1] && grid[i][j] !== 0) {
         grid[i][j] *= 2;
         grid[i][j - 1] = 0;
+        score += grid[i][j];
+        if (score > highScore) {
+          highScore = score;
+        }
       }
     }
   }
 }
 
 function moveRight() {
+  savePreviousGrid();
   slideRight();
   combineRight();
   slideRight();
@@ -113,12 +139,17 @@ function combineUp() {
       if (grid[i][j] === grid[i + 1][j] && grid[i][j] !== 0) {
         grid[i][j] *= 2;
         grid[i + 1][j] = 0;
+        score += grid[i][j];
+        if (score > highScore) {
+          highScore = score;
+        }
       }
     }
   }
 }
 
 function moveUp() {
+  savePreviousGrid();
   slideUp();
   combineUp();
   slideUp();
@@ -148,12 +179,17 @@ function combineDown() {
       if (grid[i][j] === grid[i - 1][j] && grid[i][j] !== 0) {
         grid[i][j] *= 2;
         grid[i - 1][j] = 0;
+        score += grid[i][j];
+        if (score > highScore) {
+          highScore = score;
+        }
       }
     }
   }
 }
 
 function moveDown() {
+  savePreviousGrid();
   slideDown();
   combineDown();
   slideDown();
@@ -191,8 +227,18 @@ function checkLoss() {
   return true;
 }
 
+onInput("w", () => {
+  moveUp();
+  if (checkWin() || checkLoss()) return;
+});
+
 onInput("a", () => {
   moveLeft();
+  if (checkWin() || checkLoss()) return;
+});
+
+onInput("s", () => {
+  moveDown();
   if (checkWin() || checkLoss()) return;
 });
 
@@ -201,15 +247,7 @@ onInput("d", () => {
   if (checkWin() || checkLoss()) return;
 });
 
-onInput("w", () => {
-  moveUp();
-  if (checkWin() || checkLoss()) return;
-});
-
-onInput("s", () => {
-  moveDown();
-  if (checkWin() || checkLoss()) return;
-});
+onInput("j", () => undoMove());
 
 addRandomTile();
 addRandomTile();
