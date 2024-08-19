@@ -10,6 +10,7 @@ let grid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
 let previousGrid = [];
 let score = 0;
 let highScore = 0;
+let undoCount = 3; // Limits number moves one can undo ... 
 
 setLegend(
    [ 'border', bitmap`
@@ -245,6 +246,7 @@ function drawGrid() {
   }
   addText(`Score: ${score}`, { x: 1, y: 8, color: color`3` });
   addText(`High Score: ${highScore}`, { x: 1, y: 9, color: color`3` });
+  addText(`Undo: ${undoCount}`, { x: 1, y: 10, color: color`3` });
 }
 
 function savePreviousGrid() {
@@ -252,10 +254,22 @@ function savePreviousGrid() {
 }
 
 function undoMove() {
-  if (previousGrid.length > 0) {
+  if (previousGrid.length > 0 && undoCount > 0) {
     grid = previousGrid.map(row => row.slice());
     drawGrid();
+    undoCount--;
   }
+}
+
+function animateTileMove(fromX, fromY, toX, toY) {
+  let tile = getTile(fromX, fromY);
+  if (tile) {
+    tile.animate({ x: toX, y: toY }, 200); // 200ms animation duration
+  }
+}
+
+function playSound(sound) {
+  // Add your sound playing logic here
 }
 
 function slideLeft() {
@@ -265,10 +279,6 @@ function slideLeft() {
     let zeros = Array(missing).fill(0);
     grid[i] = row.concat(zeros);
   }
-}
-
-function playSound(sound) {
-  // Add your sound playing logic here
 }
 
 function combineLeft() {
@@ -287,22 +297,8 @@ function combineLeft() {
   }
 }
 
-function animateTileMove(fromX, fromY, toX, toY) {
-  let tile = getTile(fromX, fromY);
-  if (tile) {
-    tile.animate({ x: toX, y: toY }, 200); // 200ms animation duration
-  }
-}
-
 function moveLeft() {
   savePreviousGrid();
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize - 1; j++) {
-      if (grid[i][j] === 0 && grid[i][j + 1] !== 0) {
-        animateTileMove(j + 1, i, j, i);
-      }
-    }
-  }
   slideLeft();
   combineLeft();
   slideLeft();
@@ -317,7 +313,7 @@ function slideRight() {
     let zeros = Array(missing).fill(0);
     grid[i] = zeros.concat(row);
   }
-} // <-- Added missing closing brace
+}
 
 function combineRight() {
   for (let i = 0; i < gridSize; i++) {
@@ -329,6 +325,7 @@ function combineRight() {
         if (score > highScore) {
           highScore = score;
         }
+        playSound('merge'); // Play merge sound
       }
     }
   }
@@ -369,6 +366,7 @@ function combineUp() {
         if (score > highScore) {
           highScore = score;
         }
+        playSound('merge'); // Play merge sound
       }
     }
   }
@@ -409,6 +407,7 @@ function combineDown() {
         if (score > highScore) {
           highScore = score;
         }
+        playSound('merge'); // Play merge sound
       }
     }
   }
@@ -473,7 +472,7 @@ onInput("d", () => {
   if (checkWin() || checkLoss()) return;
 });
 
-onInput("u", () => undoMove());
+onInput("j", () => undoMove());
 
 addRandomTile();
 addRandomTile();
