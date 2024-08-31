@@ -5,488 +5,169 @@
 @addedOn: 2024-08-17
 */
 
-const gridSize = 4;
-let grid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
-let previousGrid = [];
-let score = 0;
-let highScore = 0;
-let undoCount = 3; // Limits number moves one can undo ... 
-
-const border = "l"
-const two = "a";
-const four = "b";
-const eight = "c";
-const sixteen = "d";
-const thirtytwo = "e";
-const sixtyfour = "f";
-const onetwentyeight = "g";
-const twofiftysix = "h";
-const fivetwelve = "i";
-const tentwentyfour = "j";
-const twentyfortyeight = "k";
+const EMPTY = "-";
+const TILE_VALUES = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
+const TILE_MAP = {
+  "-": EMPTY,
+  "a": "2",
+  "b": "4",
+  "c": "8",
+  "d": "16",
+  "e": "32",
+  "f": "64",
+  "g": "128",
+  "h": "256",
+  "i": "512",
+  "j": "1024",
+  "k": "2048"
+};
 
 setLegend(
-   [ 'border', bitmap`
-1111111111111111
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1..............1
-1111111111111111`],
-  [ 'two', bitmap`
-2222222222222222
-2222222222222222
-2222222222222222
-2222222222222222
-2222222222222222
-2222221111222222
-2222221221222222
-2222222221222222
-2222221111222222
-2222221222222222
-2222221111222222
-2222222222222222
-2222222222222222
-2222222222222222
-2222222222222222
-2222222222222222`],
-  [ 'four', bitmap`
-2222222222222222
-2222222222222222
-2222222222222222
-2222212222212222
-2222212222212222
-2222212222212222
-2222212222212222
-2222212222212222
-2222211111112222
-2222222222212222
-2222222222212222
-2222222222212222
-2222222222212222
-2222222222222222
-2222222222222222
-2222222222222222`],
-  [ 'eight', bitmap`
-FFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFF
-FFFFF222222FFFFF
-FFFFF2FFFF2FFFFF
-FFFFF2FFFF2FFFFF
-FFFFF2FFFF2FFFFF
-FFFFF222222FFFFF
-FFFFF2FFFF2FFFFF
-FFFFF2FFFF2FFFFF
-FFFFF2FFFF2FFFFF
-FFFFF222222FFFFF
-FFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFF
-FFFFFFFFFFFFFFFF`],
-  [ 'sixteen', bitmap`
-9999999999999999
-9999999999999999
-9999999999999999
-9999229929999999
-9992929929999999
-9999929929999999
-9999929929999999
-9999929929999999
-9999929922229999
-9999929929929999
-9999929929929999
-9999929929929999
-9999222922229999
-9999999999999999
-9999999999999999
-9999999999999999`],
-   [ 'thirtytwo', bitmap`
-4444444444444444
-4444444444444444
-4444444444444444
-4442222422224444
-4444442444424444
-4444442444424444
-4444442444424444
-4442222422224444
-4444442424444444
-4444442424444444
-4444442424444444
-4442222422224444
-4444444444444444
-4444444444444444
-4444444444444444
-4444444444444444`],
-  [ 'sixtyfour', bitmap`
-3333333333333333
-3333333333333333
-3333333333333333
-3332333323333333
-3332333323332333
-3332333323332333
-3332333323332333
-3332333323332333
-3332222322222333
-3332332333332333
-3332332333332333
-3332332333332333
-3332222333332333
-3333333333333333
-3333333333333333
-3333333333333333`],
-  [ 'onetwentyeight', bitmap`
-6666666666666666
-6666666666666666
-6662266222622226
-6666266662626626
-6666266662626626
-6666266662626626
-6666266662626626
-6666266222622226
-6666266266626626
-6666266266626626
-6666266266626626
-6666266266626626
-6666266266626626
-6662226222622226
-6666666666666666
-6666666666666666`],
-  [ 'twofiftysix', bitmap`
-8888888888888888
-8888888888888888
-8822282222828888
-8888282888828888
-8888282888828888
-8888282888828888
-8888282888828888
-8822282222822228
-8828888882828828
-8828888882828828
-8828888882828828
-8828888882828828
-8822282222822228
-8888888888888888
-8888888888888888
-8888888888888888`],
-  [ 'fivetwelve', bitmap`
-HHHHHHHHHHHHHHHH
-HHHHHHHHHHHHHHHH
-HH222HH22HH222HH
-HH2HHHHH2HHHH2HH
-HH2HHHHH2HHHH2HH
-HH2HHHHH2HHHH2HH
-HH2HHHHH2HHHH2HH
-HH2HHHHH2HHHH2HH
-HH222HHH2HH222HH
-HHHH2HHH2HH2HHHH
-HHHH2HHH2HH2HHHH
-HHHH2HHH2HH2HHHH
-HHHH2HHH2HH2HHHH
-HH222HH222H222HH
-HHHHHHHHHHHHHHHH
-HHHHHHHHHHHHHHHH`],
-  [ 'tentwentyfour', bitmap`
-7777777777777777
-7777777777777777
-7227222272227277
-7727277277727272
-7727277277727272
-7727277277727272
-7727277277727272
-7727277277727272
-7727277272227222
-7727277272777772
-7727277272777772
-7727277272777772
-7727277272777772
-7727222272222772
-7777777777777777
-7777777777777777`],
-  [ 'twentyfortyeight', bitmap`
-5555555555555555
-5555555555555555
-5222522252555222
-5552525252525252
-5552525252525252
-5552525252525252
-5552525252525252
-5552525252225252
-5222525255525222
-5255525255525252
-5255525255525252
-5255525255525252
-5255525255525252
-5222522255525222
-5555555555555555
-5555555555555555`]
+  [EMPTY, bitmap],
+  ...TILE_VALUES.map((value, index) => [value, bitmap])
 );
 
-function addRandomTile() {
-  let emptyTiles = [];
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      if (grid[i][j] === 0) {
-        emptyTiles.push({ x: i, y: j });
-      }
-    }
+let level = 0;
+const levels = [
+  map`
+----
+----
+----
+----`,
+];
+
+let boardChanged = false;
+let isGameOver = false;
+
+function moveTiles(direction) {
+  if (isGameOver) return;
+
+  const moveFunctions = {
+    "w": moveUp,
+    "s": moveDown,
+    "a": moveLeft,
+    "d": moveRight
+  };
+
+  moveFunctionsdirection;
+  if (boardChanged) {
+    generateTile();
+    boardChanged = false;
   }
-  if (emptyTiles.length > 0) {
-    let { x, y } = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-    grid[x][y] = Math.random() < 0.9 ? 2 : 4;
-  }
-}
 
-function drawGrid() {
-  clearText();
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      clearTile(j, i);
-      if (grid[i][j] !== 0) {
-        addSprite(j, i, `tile${grid[i][j]}`);
-      }
-    }
-  }
-  addText(`Score: ${score}`, { x: 1, y: 8, color: color`3` });
-  addText(`High Score: ${highScore}`, { x: 1, y: 9, color: color`3` });
-  addText(`Undo: ${undoCount}`, { x: 1, y: 10, color: color`3` });
-}
-
-function savePreviousGrid() {
-  previousGrid = grid.map(row => row.slice());
-}
-
-function undoMove() {
-  if (previousGrid.length > 0 && undoCount > 0) {
-    grid = previousGrid.map(row => row.slice());
-    drawGrid();
-    undoCount--;
-  }
-}
-
-function animateTileMove(fromX, fromY, toX, toY) {
-  let tile = getTile(fromX, fromY);
-  if (tile) {
-    tile.animate({ x: toX, y: toY }, 200); // 200ms animation duration
-  }
-}
-
-function playSound(sound) {
-  // Add your sound playing logic here
-}
-
-function slideLeft() {
-  for (let i = 0; i < gridSize; i++) {
-    let row = grid[i].filter(val => val);
-    let missing = gridSize - row.length;
-    let zeros = Array(missing).fill(0);
-    grid[i] = row.concat(zeros);
-  }
-}
-
-function combineLeft() {
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize - 1; j++) {
-      if (grid[i][j] === grid[i][j + 1] && grid[i][j] !== 0) {
-        grid[i][j] *= 2;
-        grid[i][j + 1] = 0;
-        score += grid[i][j];
-        if (score > highScore) {
-          highScore = score;
-        }
-        playSound('merge'); // Play merge sound
-      }
-    }
-  }
-}
-
-function moveLeft() {
-  savePreviousGrid();
-  slideLeft();
-  combineLeft();
-  slideLeft();
-  addRandomTile();
-  drawGrid();
-}
-
-function slideRight() {
-  for (let i = 0; i < gridSize; i++) {
-    let row = grid[i].filter(val => val);
-    let missing = gridSize - row.length;
-    let zeros = Array(missing).fill(0);
-    grid[i] = zeros.concat(row);
-  }
-}
-
-function combineRight() {
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = gridSize - 1; j > 0; j--) {
-      if (grid[i][j] === grid[i][j - 1] && grid[i][j] !== 0) {
-        grid[i][j] *= 2;
-        grid[i][j - 1] = 0;
-        score += grid[i][j];
-        if (score > highScore) {
-          highScore = score;
-        }
-        playSound('merge'); // Play merge sound
-      }
-    }
-  }
-}
-
-function moveRight() {
-  savePreviousGrid();
-  slideRight();
-  combineRight();
-  slideRight();
-  addRandomTile();
-  drawGrid();
-}
-
-function slideUp() {
-  for (let j = 0; j < gridSize; j++) {
-    let column = [];
-    for (let i = 0; i < gridSize; i++) {
-      if (grid[i][j] !== 0) {
-        column.push(grid[i][j]);
-      }
-    }
-    let missing = gridSize - column.length;
-    let zeros = Array(missing).fill(0);
-    for (let i = 0; i < gridSize; i++) {
-      grid[i][j] = i < column.length ? column[i] : 0;
-    }
-  }
-}
-
-function combineUp() {
-  for (let j = 0; j < gridSize; j++) {
-    for (let i = 0; i < gridSize - 1; i++) {
-      if (grid[i][j] === grid[i + 1][j] && grid[i][j] !== 0) {
-        grid[i][j] *= 2;
-        grid[i + 1][j] = 0;
-        score += grid[i][j];
-        if (score > highScore) {
-          highScore = score;
-        }
-        playSound('merge'); // Play merge sound
-      }
-    }
+  if (checkLoss()) {
+    isGameOver = true;
+    displayMessage("You lost :(", "Press j to restart");
+  } else if (getAll("k").length >= 1) {
+    isGameOver = true;
+    displayMessage("You win!", "Press j to restart");
   }
 }
 
 function moveUp() {
-  savePreviousGrid();
-  slideUp();
-  combineUp();
-  slideUp();
-  addRandomTile();
-  drawGrid();
-}
-
-function slideDown() {
-  for (let j = 0; j < gridSize; j++) {
-    let column = [];
-    for (let i = 0; i < gridSize; i++) {
-      if (grid[i][j] !== 0) {
-        column.push(grid[i][j]);
-      }
-    }
-    let missing = gridSize - column.length;
-    let zeros = Array(missing).fill(0);
-    for (let i = 0; i < gridSize; i++) {
-      grid[i][j] = i < missing ? 0 : column[i - missing];
-    }
-  }
-}
-
-function combineDown() {
-  for (let j = 0; j < gridSize; j++) {
-    for (let i = gridSize - 1; i > 0; i--) {
-      if (grid[i][j] === grid[i - 1][j] && grid[i][j] !== 0) {
-        grid[i][j] *= 2;
-        grid[i - 1][j] = 0;
-        score += grid[i][j];
-        if (score > highScore) {
-          highScore = score;
-        }
-        playSound('merge'); // Play merge sound
-      }
+  for (let x = 0; x <= 3; x++) {
+    let nextYToFill = 0;
+    for (let y = 1; y <= 3; y++) {
+      handleTileMove(x, y, x, nextYToFill, "y", 1);
     }
   }
 }
 
 function moveDown() {
-  savePreviousGrid();
-  slideDown();
-  combineDown();
-  slideDown();
-  addRandomTile();
-  drawGrid(); 
-}
-
-function checkWin() {
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      if (grid[i][j] === 2048) {
-        addText('You Win!', { x: 5, y: 7, color: color`2` });
-        return true;
-      }
+  for (let x = 0; x <= 3; x++) {
+    let nextYToFill = 3;
+    for (let y = 2; y >= 0; y--) {
+      handleTileMove(x, y, x, nextYToFill, "y", -1);
     }
   }
-  return false;
+}
+
+function moveLeft() {
+  for (let y = 0; y <= 3; y++) {
+    let nextXToFill = 0;
+    for (let x = 1; x <= 3; x++) {
+      handleTileMove(x, y, nextXToFill, y, "x", 1);
+    }
+  }
+}
+
+function moveRight() {
+  for (let y = 0; y <= 3; y++) {
+    let nextXToFill = 3;
+    for (let x = 2; x >= 0; x--) {
+      handleTileMove(x, y, nextXToFill, y, "x", -1);
+    }
+  }
+}
+
+function handleTileMove(x, y, nextX, nextY, axis, step) {
+  const currentTile = getTile(x, y)[0].type;
+  const nextTile = getTile(nextX, nextY)[0].type;
+
+  if (currentTile === EMPTY) return;
+
+  if (currentTile === nextTile) {
+    clearTile(nextX, nextY);
+    addSprite(nextX, nextY, TILE_VALUES[TILE_VALUES.indexOf(currentTile) + 1]);
+    clearTile(x, y);
+    addSprite(x, y, EMPTY);
+    boardChanged = true;
+  } else if (nextTile === EMPTY) {
+    clearTile(nextX, nextY);
+    addSprite(nextX, nextY, currentTile);
+    clearTile(x, y);
+    addSprite(x, y, EMPTY);
+    boardChanged = true;
+  } else {
+    if (axis === "x") {
+      nextX += step;
+    } else {
+      nextY += step;
+    }
+    handleTileMove(x, y, nextX, nextY, axis, step);
+  }
+}
+
+function generateTile() {
+  const emptyTiles = getAll(EMPTY);
+  if (emptyTiles.length === 0) return;
+
+  const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+  clearTile(randomTile.x, randomTile.y);
+  addSprite(randomTile.x, randomTile.y, "a");
 }
 
 function checkLoss() {
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      if (grid[i][j] === 0) {
-        return false;
-      }
-      if (i < gridSize - 1 && grid[i][j] === grid[i + 1][j]) {
-        return false;
-      }
-      if (j < gridSize - 1 && grid[i][j] === grid[i][j + 1]) {
-        return false;
-      }
+  if (getAll(EMPTY).length > 0) return false;
+
+  for (let x = 0; x <= 3; x++) {
+    for (let y = 1; y <= 3; y++) {
+      if (getTile(x, y)[0].type === getTile(x, y - 1)[0].type) return false;
     }
   }
-  addText('Game Over', { x: 5, y: 7, color: color`2` });
+
+  for (let y = 0; y <= 3; y++) {
+    for (let x = 1; x <= 3; x++) {
+      if (getTile(x, y)[0].type === getTile(x - 1, y)[0].type) return false;
+    }
+  }
+
   return true;
 }
 
-onInput("w", () => {
-  moveUp();
-  if (checkWin() || checkLoss()) return;
+function displayMessage(message, subMessage) {
+  addText(message, { y: 4, color: color`0` });
+  addText(subMessage, { y: 8, color: color`0` });
+}
+
+onInput("w", () => moveTiles("w"));
+onInput("s", () => moveTiles("s"));
+onInput("a", () => moveTiles("a"));
+onInput("d", () => moveTiles("d"));
+onInput("j", () => {
+  isGameOver = false;
+  clearText("");
+  setMap(levels[level]);
+  generateTile();
+  generateTile();
 });
-
-onInput("a", () => {
-  moveLeft();
-  if (checkWin() || checkLoss()) return;
-});
-
-onInput("s", () => {
-  moveDown();
-  if (checkWin() || checkLoss()) return;
-});
-
-onInput("d", () => {
-  moveRight();
-  if (checkWin() || checkLoss()) return;
-});
-
-onInput("j", () => undoMove());
-
-addRandomTile();
-addRandomTile();
-drawGrid();
