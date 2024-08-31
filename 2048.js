@@ -12,6 +12,19 @@ let score = 0;
 let highScore = 0;
 let undoCount = 3; // Limits number moves one can undo ... 
 
+const border = "l"
+const two = "a";
+const four = "b";
+const eight = "c";
+const sixteen = "d";
+const thirtytwo = "e";
+const sixtyfour = "f";
+const onetwentyeight = "g";
+const twofiftysix = "h";
+const fivetwelve = "i";
+const tentwentyfour = "j";
+const twentyfortyeight = "k";
+
 setLegend(
    [ 'border', bitmap`
 1111111111111111
@@ -30,7 +43,7 @@ setLegend(
 1..............1
 1..............1
 1111111111111111`],
-  [ 'tile2', bitmap`
+  [ 'two', bitmap`
 2222222222222222
 2222222222222222
 2222222222222222
@@ -47,7 +60,7 @@ setLegend(
 2222222222222222
 2222222222222222
 2222222222222222`],
-  [ 'tile4', bitmap`
+  [ 'four', bitmap`
 2222222222222222
 2222222222222222
 2222222222222222
@@ -64,7 +77,7 @@ setLegend(
 2222222222222222
 2222222222222222
 2222222222222222`],
-  [ 'tile8', bitmap`
+  [ 'eight', bitmap`
 FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF
@@ -81,7 +94,7 @@ FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF`],
-  [ 'tile16', bitmap`
+  [ 'sixteen', bitmap`
 9999999999999999
 9999999999999999
 9999999999999999
@@ -98,7 +111,7 @@ FFFFFFFFFFFFFFFF`],
 9999999999999999
 9999999999999999
 9999999999999999`],
-   [ 'tile64', bitmap`
+   [ 'thirtytwo', bitmap`
 4444444444444444
 4444444444444444
 4444444444444444
@@ -115,7 +128,7 @@ FFFFFFFFFFFFFFFF`],
 4444444444444444
 4444444444444444
 4444444444444444`],
-  [ 'tile64', bitmap`
+  [ 'sixtyfour', bitmap`
 3333333333333333
 3333333333333333
 3333333333333333
@@ -132,7 +145,7 @@ FFFFFFFFFFFFFFFF`],
 3333333333333333
 3333333333333333
 3333333333333333`],
-  [ 'tile128', bitmap`
+  [ 'onetwentyeight', bitmap`
 6666666666666666
 6666666666666666
 6662266222622226
@@ -149,7 +162,7 @@ FFFFFFFFFFFFFFFF`],
 6662226222622226
 6666666666666666
 6666666666666666`],
-  [ 'tile256', bitmap`
+  [ 'twofiftysix', bitmap`
 8888888888888888
 8888888888888888
 8822282222828888
@@ -166,7 +179,7 @@ FFFFFFFFFFFFFFFF`],
 8888888888888888
 8888888888888888
 8888888888888888`],
-  [ 'tile512', bitmap`
+  [ 'fivetwelve', bitmap`
 HHHHHHHHHHHHHHHH
 HHHHHHHHHHHHHHHH
 HH222HH22HH222HH
@@ -183,7 +196,7 @@ HHHH2HHH2HH2HHHH
 HH222HH222H222HH
 HHHHHHHHHHHHHHHH
 HHHHHHHHHHHHHHHH`],
-  [ 'tile1024', bitmap`
+  [ 'tentwentyfour', bitmap`
 7777777777777777
 7777777777777777
 7227222272227277
@@ -200,7 +213,7 @@ HHHHHHHHHHHHHHHH`],
 7727222272222772
 7777777777777777
 7777777777777777`],
-  [ 'tile2048', bitmap`
+  [ 'twentyfortyeight', bitmap`
 5555555555555555
 5555555555555555
 5222522252555222
