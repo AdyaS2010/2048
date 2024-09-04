@@ -3,6 +3,9 @@
 ## Description
 This is a JavaScript implementation of the classic 2048 game for Sprig! The objective is to combine tiles with the same value to reach the 2048 tile (same rules as 2048 - follows convention)! 
 
+### Link to Game
+https://sprig.hackclub.com/share/n2dVKeFOjQs1hRdNdfMz 
+
 ## How to Play
 - Use the **W**, **A**, **S**, and **D** keys to move the tiles up, left, down, and right, respectively.
 - When two tiles with the same value collide, they merge into one tile with the sum of their values.
